@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>RubyJS by hasclass</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>RubyJS</h1>
+        <p></p>
+
+        <p class="view"><a href="https://github.com/hasclass/rubyjs-pages">View the Project on GitHub <small>hasclass/rubyjs-pages</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/hasclass/rubyjs-pages/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/hasclass/rubyjs-pages/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/hasclass/rubyjs-pages">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h4>State of this project:</h4>
+
+<p>This project is pre-alpha (whatever that means). Implemented are roughly 80% of the methods from Array, Enumerable, String, Range, Numeric, Float, Integer. Check the current progress in progress.txt. Most big issues have been solved and I am finishing the remaining methods, trying to find the right tradeoffs and smart ways to package things together.</p>
+
+<h2>RubyJS</h2>
+
+<p>A port of the Ruby 1.9.3 corelib to coffeescript/javascript/node that conforms to rubyspec.org and does not pollute the global javascript namespace. It is not an attempt to port or mimic the ruby object model and metaprogramming capabilities, whatsoever. </p>
+
+<p>Why? Coffeescript made it easy to switch from ruby/python. Unfortunately I quickly missed the functionality of the ruby corelib (the very core part of it, String, Array, Numeric, etc.). </p>
+
+<p>In numbers (as of 2012-07-25): 230 methods, 900 specs, gzipped ~10kb, minified ~40kb.</p>
+
+<h3>Features</h3>
+
+<ul>
+<li>Methods comply 1 to 1 to ruby code (tested by ~1000 rubyspec tests), down to raising the same Error types. </li>
+<li>All methods of the core ruby classes, excluding ruby specifics and bit operators.</li>
+<li>Enumerators, Iterators, Enumerable. Chainable and extendible.</li>
+<li>Consistent breaking out of loops using: catch_break (breaker) -&gt; breaker.break().</li>
+<li>Methods automatically box/coerce native JS primitives into the right RubyJS type.</li>
+<li>Small filesize: 10-20kb minified and gzipped.</li>
+</ul><h3>RubyJS Code samples</h3>
+
+<div class="highlight"><pre><span class="c1"># ** All return values are instances of rubyjs classes. **</span>
+
+<span class="c1">## Numbers -----------------------------------------------------</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="mf">1.0123</span><span class="p">).</span><span class="nx">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>               <span class="c1"># =&gt; 1.01</span>
+
+<span class="c1">## String ------------------------------------------------------</span>
+<span class="nx">_r</span><span class="p">(</span><span class="s">"-"</span><span class="p">).</span><span class="nx">multiply</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>              <span class="c1"># =&gt; "--------------"</span>
+
+<span class="nv">str = </span><span class="nx">_r</span><span class="p">(</span><span class="s">"hello world"</span><span class="p">)</span>
+<span class="nx">str</span><span class="p">.</span><span class="nx">capitalize</span><span class="p">().</span><span class="nx">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s">'-'</span><span class="p">)</span>   <span class="c1"># =&gt; "Hello world--------"</span>
+
+<span class="nv">words = </span><span class="nx">str</span><span class="p">.</span><span class="nx">scan</span><span class="p">(</span><span class="sr">/\w+/</span><span class="p">)</span>           <span class="c1"># =&gt; ['hello', 'world']</span>
+<span class="nx">_r</span><span class="p">(</span><span class="s">"a"</span><span class="p">).</span><span class="nx">upto</span><span class="p">(</span><span class="s">"f"</span><span class="p">).</span><span class="nx">to_a</span><span class="p">()</span>          <span class="c1"># =&gt; ['a', 'b', 'c', 'd', 'e']</span>
+
+<span class="c1">## Iterators, Enumerators --------------------------------------</span>
+<span class="nx">words</span><span class="p">.</span><span class="nx">map</span> <span class="nf">(w) -&gt;</span> <span class="nx">w</span><span class="p">.</span><span class="nx">capitalize</span><span class="p">()</span>   <span class="c1"># =&gt; ['Hello', 'World']</span>
+
+<span class="c1">## StringToProc mimics SymbolToProc</span>
+<span class="nx">words</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="s">"succ_bang"</span><span class="p">)</span>            <span class="c1"># =&gt; ['Hellp', 'Worle']</span>
+
+<span class="c1">## use coffeescript iterators:</span>
+<span class="nx">w</span><span class="p">.</span><span class="nx">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="nx">w</span> <span class="k">in</span> <span class="nx">words</span><span class="p">.</span><span class="nx">iterator</span><span class="p">()</span>
+
+<span class="c1">## chaining enumerators:</span>
+<span class="nx">_r</span><span class="p">([</span><span class="mi">123</span><span class="p">]).</span><span class="nx">each_with_object</span><span class="p">(</span><span class="s">'foo'</span><span class="p">).</span><span class="nx">each_with_index</span> <span class="nf">(a_b, idx) -&gt;</span> 
+<span class="c1"># =&gt; a_b : [123, 'foo'], idx =&gt; 0</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="mi">5</span><span class="p">).</span><span class="nx">upto</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="nf">(i) -&gt;</span> <span class="c1"># ...</span>
+<span class="nx">_r</span><span class="p">(</span><span class="mi">5</span><span class="p">).</span><span class="nx">upto</span><span class="p">(</span><span class="mi">10</span><span class="p">).</span><span class="nx">to_a</span><span class="p">()</span>             <span class="c1"># =&gt; [5,6,7,8,9]</span>
+<span class="nx">_r</span><span class="p">(</span><span class="mi">5</span><span class="p">).</span><span class="nx">upto</span><span class="p">(</span><span class="mi">10</span><span class="p">).</span><span class="nx">inject</span><span class="p">(</span><span class="s">"+"</span><span class="p">)</span>        <span class="c1"># =&gt; 35</span>
+
+<span class="c1">## bang methods</span>
+<span class="nx">str</span><span class="p">.</span><span class="nx">capitalize_bang</span><span class="p">()</span>
+<span class="nx">str</span>                               <span class="c1"># =&gt; 'Hello world'</span>
+
+<span class="c1">## Chainable: rubyjs methods return rubyjs objects</span>
+<span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">).</span><span class="nx">size</span><span class="p">()</span>                <span class="c1"># =&gt; 5</span>
+</pre></div>
+
+<h2>Why porting the Ruby core lib</h2>
+
+<p>There is no standard core library for JS/Coffee. jQuery and underscorejs do not offer the functionality I needed. </p>
+
+<ul>
+<li>The Ruby corelib is fantastic and battle proven. </li>
+<li>Not reinventing the wheel, ruby developers are immediately productive</li>
+<li>Rubyspec has a complete (rspec) testsuite that can be ported to coffeescript easily (a matter of Find/Replace)</li>
+<li>Rubinius gives us an implementation of all corelib classes/methods. Not sure how to implement String#scan, check the rubinius source.</li>
+<li>With the corelib, porting additional rubygems to Coffeescript becomes doable</li>
+<li>Porting from rubinius to rubyjs is fun. completely speced and testdriven. Also it's a great way to learn both languages.</li>
+</ul><h2>Getting Started</h2>
+
+<ul>
+<li>Clone repository</li>
+<li>Run the coffee console loading the rubyjs files:</li>
+</ul><pre><code>/path/to/rubyjs $ coffee -r ./lib/ruby.coffee
+coffee&gt; _r('hello world').capitalize()
+"Hello World"
+coffee&gt; _r('hello world').capitalize().unbox()
+'Hello world'
+</code></pre>
+
+<ul>
+<li>Setup development environment:</li>
+</ul><pre><code>$ bundle install
+$ cake setup_tests            # compiles all test files
+$ bundle exec guard           # automatically compile coffeescript
+$ rake jasmine                # starts jasmine server
+$ open http://localhost:8888  # pray
+</code></pre>
+
+<p>If you get an error like Error: spawn EMFILE and you're on a mac, check this thread:
+<a href="https://groups.google.com/forum/?fromgroups#!topic/nodejs/jeec5pAqhps">https://groups.google.com/forum/?fromgroups#!topic/nodejs/jeec5pAqhps</a></p>
+
+<h2>Assorted details</h2>
+
+<h4>Ruby method equivalents</h4>
+
+<pre><code># slightly outdated, needs to be updated.
+Object#foo?     = Object#foo
+Object#foo!     = Object#foo_bang
+
+Object['&lt;&lt;']    = Object#push
+Object['&lt;=&gt;']   = Object#cmp
+Object['==']    = Object#equal
+Object['===']   = Object#equal_case
+Object['&lt;']     = Object#lt
+Object['&lt;=']    = Object#lteq
+Object['&gt;']     = Object#gt
+Object['&gt;=']    = Object#gteq
+Object['**']    = ?
+Object['*']     = Object#multiply
+Object['/']     = Object#divide
+Object['%']     = Object#modulo
+Object['+']     = Object#plus
+Object['-']     = Object#minus
+</code></pre>
+
+<h4>No monkey patching js core classes. Dont interfere with the global namespace</h4>
+
+<p>All JSRuby classes sit in an own namespace. Temporarly it is: <strong>_r</strong></p>
+
+<div class="highlight"><pre><span class="nv">str = </span><span class="s">"hello"</span>
+<span class="nx">str</span><span class="p">.</span><span class="nx">capitalize</span><span class="p">()</span> 
+<span class="c1"># =&gt; Throws NoMethodError</span>
+
+<span class="nv">str = </span><span class="k">new</span> <span class="nx">rubyjs</span><span class="p">.</span><span class="nb">String</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+<span class="nx">str</span><span class="p">.</span><span class="nx">capitalize</span><span class="p">()</span> 
+<span class="c1"># =&gt; &lt;rubyjs.String "Hello"&gt;</span>
+</pre></div>
+
+<h4>Boxing/Unboxing</h4>
+
+<p>For classes that have js core classes or primitives, e.g. String, Date, Array, convert from core to JSRuby classes and back using boxing and unboxing. Boxing a primitive to their JSRuby counterpart is done using <strong>_r( value )</strong>. Unboxing a JSRuby object to their primitive counterpart by calling obj.<strong>unbox()</strong> and recursivively <strong>unbox(true)</strong>.</p>
+
+<p>Boxing primitive values using _r():</p>
+
+<div class="highlight"><pre><span class="nv">js_string = </span><span class="s">"hello"</span>
+<span class="c1"># =&gt; "hello"</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">)</span>
+<span class="c1"># =&gt; &lt;rubyjs.String "hello"&gt;</span>
+</pre></div>
+
+<p>To get the JS core primitives back we can unbox() them:</p>
+
+<div class="highlight"><pre><span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">).</span><span class="nx">unbox</span><span class="p">()</span>
+<span class="c1"># =&gt; "hello"</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">).</span><span class="nx">capitalize</span><span class="p">().</span><span class="nx">unbox</span><span class="p">()</span>
+<span class="c1"># =&gt; "hello"</span>
+</pre></div>
+
+<p>Unboxing can be made recursive by calling unbox(true). Useful for arrays:</p>
+
+<div class="highlight"><pre><span class="nx">_r</span><span class="p">(</span><span class="s">"hello world"</span><span class="p">).</span><span class="nx">scan</span><span class="p">(</span><span class="sr">/\w+/</span><span class="p">).</span><span class="nx">unbox</span><span class="p">()</span>
+<span class="c1"># =&gt; [ &lt;rubyjs.String "hello"&gt;, &lt;rubyjs.String "hello"&gt; ]</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="s">"hello world"</span><span class="p">).</span><span class="nx">scan</span><span class="p">(</span><span class="sr">/\w+/</span><span class="p">).</span><span class="nx">unbox</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<span class="c1"># =&gt; [ 'hello', 'hello' ]</span>
+</pre></div>
+
+<h4>Chainable: JSRuby return values are JSRuby objects.</h4>
+
+<p>When using JSRuby methods, the return values will become JSRuby objects. This allows for chaining methods.</p>
+
+<div class="highlight"><pre><span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">).</span><span class="nx">capitalize</span><span class="p">()</span>
+<span class="c1"># =&gt; &lt;rubyjs.String "hello"&gt;</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">).</span><span class="nx">capitalize</span><span class="p">().</span><span class="nx">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s">'-'</span><span class="p">)</span>
+<span class="c1"># =&gt; &lt;rubyjs.String "Hello------"&gt;</span>
+
+<span class="nx">_r</span><span class="p">(</span><span class="s">"hello world"</span><span class="p">).</span><span class="nx">scan</span><span class="p">(</span><span class="sr">/\w+/</span><span class="p">)</span>
+<span class="c1"># =&gt; &lt;rubyjs.Array [ &lt;rubyjs.String "hello"&gt;, &lt;rubyjs.String "hello"&gt; ]&gt;</span>
+</pre></div>
+
+<h4>Porting to rubyspec.org</h4>
+
+<p>Porting the rubyspecs is easy. Clone the rubinius repository, copy a spec file: </p>
+
+<div class="highlight"><pre><span class="c1"># /path/to/rubinius/spec/ruby/core/string/ljust_spec.rb</span>
+
+<span class="n">describe</span> <span class="s2">"String#ljust with length, padding"</span> <span class="k">do</span>
+  <span class="n">it</span> <span class="s2">"returns a new string of specified length with self left justified and padded with padstr"</span> <span class="k">do</span>
+    <span class="s2">"hello"</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s1">'1234'</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="s2">"hello123412341234123"</span>
+
+    <span class="s2">""</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"abcd"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="s2">"a"</span>
+    <span class="s2">""</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"abcd"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="s2">"ab"</span>
+    <span class="s2">""</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"abcd"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="s2">"abc"</span>
+    <span class="c1"># ...</span>
+  <span class="k">end</span>
+  <span class="c1"># ...</span>
+</pre></div>
+
+<p>Replace " do" with ", -&gt;", the ".should ==" with "expect(...).toEqual ". And add the boxing and unboxing methods.</p>
+
+<div class="highlight"><pre><span class="c1"># /path/to/rubyjs/spec/corelib/string/ljust_spec.coffee</span>
+
+<span class="nx">describe</span> <span class="s">"String</span><span class="err">#</span><span class="s">ljust with length, padding"</span><span class="p">,</span> <span class="o">-&gt;</span>
+  <span class="nx">it</span> <span class="s">"returns a new string of specified length with self left justified and padded with padstr"</span><span class="p">,</span> <span class="o">-&gt;</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">_r</span><span class="p">(</span><span class="s">"hello"</span><span class="p">).</span><span class="nx">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s">'1234'</span><span class="p">).</span><span class="nx">unbox</span><span class="p">()).</span><span class="nx">toEqual</span><span class="p">(</span><span class="s">"hello123412341234123"</span><span class="p">)</span>
+
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">_r</span><span class="p">(</span><span class="s">""</span><span class="p">).</span><span class="nx">ljust</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">).</span><span class="nx">unbox</span><span class="p">()).</span><span class="nx">toEqual</span><span class="p">(</span><span class="s">"a"</span><span class="p">)</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">_r</span><span class="p">(</span><span class="s">""</span><span class="p">).</span><span class="nx">ljust</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">).</span><span class="nx">unbox</span><span class="p">()).</span><span class="nx">toEqual</span><span class="p">(</span><span class="s">"ab"</span><span class="p">)</span>
+    <span class="nx">expect</span><span class="p">(</span><span class="nx">_r</span><span class="p">(</span><span class="s">""</span><span class="p">).</span><span class="nx">ljust</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">"abcd"</span><span class="p">).</span><span class="nx">unbox</span><span class="p">()).</span><span class="nx">toEqual</span><span class="p">(</span><span class="s">"abc"</span><span class="p">)</span>
+</pre></div>
+
+<h1>Development</h1>
+
+<pre><code># Generate documenation:
+npm install -g codo
+codo lib/
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/hasclass">hasclass</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-33740484-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
